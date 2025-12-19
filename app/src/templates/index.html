@@ -1,0 +1,13 @@
+cat > app/src/templates/index.html <<'EOF'
+<!doctype html>
+<html>
+  <head><title>{{ title }}</title></head>
+  <body>
+    <h1>{{ title }}</h1>
+    <p>UI is working.</p>
+    <p>Try API: <a href="/api/hello">/api/hello</a></p>
+    <p>Health: <a href="/health">/health</a></p>
+  </body>
+</html>
+EOF
+
