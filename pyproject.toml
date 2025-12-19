@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=70", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "devops-cloud-k8s-flask"
+version = "0.1.0"
+description = "End-to-end DevOps learning project: Flask app deployed on AWS EKS with CI/CD"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "flask==3.0.3"
+]
+
+[tool.setuptools]
+package-dir = {"" = "app/src"}
+
+[tool.setuptools.packages.find]
+where = ["app/src"]
+
