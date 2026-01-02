@@ -1,4 +1,4 @@
-name: Deploy Flask App to EC2 (k3s)
+kname: Deploy Flask App to EC2 (k3s)
 
 on:
   push:
@@ -7,19 +7,13 @@ on:
 
 jobs:
   deploy:
-    name: deploy
+    name: Deploy to EC2 k3s
     runs-on: ubuntu-latest
 
     steps:
-      # -------------------------
-      # 1️⃣ Checkout repository
-      # -------------------------
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # -------------------------
-      # 2️⃣ Deploy to EC2 via SSH
-      # -------------------------
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -47,14 +41,24 @@ jobs:
             echo "🐳 Build Docker image"
             docker build -t devops-flask:latest -f docker/Dockerfile .
 
-            echo "☸️ Deploy to Kubernetes (k3s)"
-            kubectl apply -f k8s/ec2/
+            echo "📦 Import image into k3s (containerd)"
+            docker save devops-flask:latest -o /tmp/devops-flask.tar
+            sudo k3s ctr images import /tmp/devops-flask.tar
+
+            echo "☸️ Configure kubectl (use ubuntu kubeconfig)"
+            export KUBECONFIG=$HOME/.kube/config
+
+            echo "✅ Cluster check"
+            kubectl get nodes --request-timeout=60s
+
+            echo "🚀 Deploy to Kubernetes"
+            kubectl apply -f k8s/ec2/ --request-timeout=120s --validate=false
 
             echo "📦 Pods status"
-            kubectl get pods -n devops
+            kubectl get pods -n devops --request-timeout=120s
 
             echo "🌐 Services status"
-            kubectl get svc -n devops
+            kubectl get svc -n devops --request-timeout=120s
 
             echo "✅ Deployment completed successfully"
 
