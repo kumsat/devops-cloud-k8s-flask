@@ -34,9 +34,12 @@ jobs:
 
             echo "📁 Go to project directory"
             cd ~/devops-cloud-k8s-flask
+"
+            echo "⬇️ Sync repo to origin/main (clean deploy)"
+	    git fetch origin main
+	    git reset --hard origin/main
+	    git clean -fd
 
-            echo "⬇️ Pull latest code"
-            git pull origin main
 
             echo "🐳 Build Docker image"
             docker build -t devops-flask:latest -f docker/Dockerfile .
