@@ -1,4 +1,4 @@
-kname: Deploy Flask App to EC2 (k3s)
+name: Deploy Flask App to EC2 (k3s)
 
 on:
   push:
