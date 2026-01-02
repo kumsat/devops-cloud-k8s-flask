@@ -1,0 +1,42 @@
+name: Deploy to EC2 k3s
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -e
+
+            echo "➡️ Moving to project directory"
+            cd ~/devops-cloud-k8s-flask
+
+            echo "➡️ Pull latest code"
+            git pull origin main
+
+            echo "➡️ Build Docker image"
+            docker build -t devops-flask:latest -f docker/Dockerfile .
+
+            echo "➡️ Import image into k3s"
+            docker save devops-flask:latest -o /tmp/devops-flask.tar
+            sudo k3s ctr images import /tmp/devops-flask.tar
+
+            echo "➡️ Restart Kubernetes deployment"
+            kubectl rollout restart deployment/flask-app -n devops
+
+            echo "✅ Deployment finished successfully"
+
