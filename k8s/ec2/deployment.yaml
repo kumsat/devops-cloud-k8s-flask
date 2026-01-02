@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: flask
-          image: devops-flask:latest
+          image: docker.io/library/devops-flask:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5007
