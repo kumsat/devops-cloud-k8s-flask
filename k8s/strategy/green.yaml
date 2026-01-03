@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flask-app-green
+  namespace: devops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flask-app
+      version: green
+  template:
+    metadata:
+      labels:
+        app: flask-app
+        version: green
+    spec:
+      containers:
+        - name: flask
+          image: docker.io/library/devops-flask:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5007
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5007
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5007
+            initialDelaySeconds: 10
+            periodSeconds: 20
+
