@@ -1,4 +1,5 @@
-from flask import jsonify, render_template
+import os
+from flask import jsonify
 
 def register_routes(app):
 
@@ -7,10 +8,7 @@ def register_routes(app):
         return jsonify(status="ok")
 
     @app.get("/api/hello")
-    def api_hello():
-        return jsonify(message="Hello from Flask API")
-
-    @app.get("/")
-    def ui_home():
-        return render_template("index.html", title="DevOps Cloud K8s Flask")
+    def hello():
+        color = os.getenv("APP_COLOR", "unknown")
+        return jsonify(message=f"Hello from {color} (Flask API)")
 
