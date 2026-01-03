@@ -13,14 +13,18 @@ Endpoint	Description
 GET /health	Health check endpoint
 GET /api/hello	API response (color-aware for Blue/Green)
 GET /	Simple UI
-🏗️ Architecture Overview
-flowchart LR
+
+## 🏗️ Architecture Overview
+
 ```mermaid
+flowchart LR
     Dev[Developer Laptop] -->|git push| GitHub[GitHub Repo]
-    GitHub -->|GitHub Actions CI/CD| EC2[EC2 Free Tier]
-    EC2 -->|Docker Build| Image[Local Docker Image]
-    Image -->|import| K3S[k3s Cluster]
-    K3S -->|Blue/Green Deployments| Pods[Flask Pods]
+    GitHub -->|CI/CD| Actions[GitHub Actions]
+    Actions -->|SSH Deploy| EC2[EC2 Free Tier]
+    EC2 --> Docker[Docker Build]
+    Docker --> K3S[k3s Cluster]
+    K3S --> BlueGreen[Blue/Green Deployments]
+    BlueGreen --> Pods[Flask Pods]
     Pods --> Service[Kubernetes Service]
     Service --> Ingress[Traefik Ingress]
     Ingress --> User[End User]
@@ -80,8 +84,8 @@ Traffic is switched by changing Service selectors
 
 Rollback is instant
 
-flowchart TB
 ```mermaid
+flowchart TB
     User --> Service
     Service -->|version=blue| Blue[Flask Blue Pods]
     Service -.->|version=green| Green[Flask Green Pods]
