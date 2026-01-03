@@ -21,10 +21,19 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5007
+          env:
+            - name: APP_COLOR
+              value: "BLUE"
           readinessProbe:
             httpGet:
               path: /health
               port: 5007
             initialDelaySeconds: 5
             periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5007
+            initialDelaySeconds: 10
+            periodSeconds: 20
 
