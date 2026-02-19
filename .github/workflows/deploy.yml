@@ -1,4 +1,4 @@
-name: Deploy Flask App to EC2 (k3s)
+name: CI/CD - Build & Deploy to EC2 (k3s)
 
 on:
   push:
@@ -7,53 +7,61 @@ on:
 
 jobs:
   deploy:
-    name: Deploy to EC2 k3s
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
+          username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
-          port: 22
-          timeout: 200s
-          command_timeout: 200s
-          script_stop: true
           script: |
-            set -e
-            echo "Connected to EC2"
+            set -euxo pipefail
+
+            APP_DIR="$HOME/devops-cloud-k8s-flask"
+            REPO_URL="https://github.com/kumsat/devops-cloud-k8s-flask.git"
+
+            echo "== WHOAMI / HOME =="
             whoami
-            hostname
-            uptime
+            echo "$HOME"
 
-            cd ~/devops-cloud-k8s-flask
+            # Ensure passwordless sudo works
+            sudo -n true
 
-            echo "Sync repo"
-            git fetch origin main
+            # Ensure git exists
+            command -v git >/dev/null 2>&1 || (sudo apt-get update && sudo apt-get install -y git)
+
+            # Clone repo if missing
+            if [ ! -d "$APP_DIR/.git" ]; then
+              rm -rf "$APP_DIR"
+              git clone "$REPO_URL" "$APP_DIR"
+            fi
+
+            cd "$APP_DIR"
+
+            echo "== Sync latest code =="
+            git fetch --prune origin main
+            git checkout -f main
             git reset --hard origin/main
-            git clean -fd
+            git clean -fdx
 
-            echo "Build Docker image"
+            echo "== Check Docker and k3s =="
+            sudo docker version
+            sudo k3s --version
+
+            echo "== Build Docker image =="
             sudo docker build -t devops-flask:latest -f docker/Dockerfile .
 
-            echo "Import image into k3s containerd"
+            echo "== Import image into k3s containerd =="
             sudo docker save devops-flask:latest -o /tmp/devops-flask.tar
             sudo k3s ctr images import /tmp/devops-flask.tar
 
-            echo "Cluster check"
-            sudo k3s kubectl get nodes --request-timeout=60s
+            echo "== Deploy to Kubernetes =="
+            sudo k3s kubectl apply -f k8s/ec2/ --validate=false
+            sudo k3s kubectl get pods -A
 
-            echo "Apply manifests"
-            sudo k3s kubectl apply -f k8s/ec2/ --request-timeout=120s --validate=false
-
-            echo "Check resources"
-            sudo k3s kubectl get ns --request-timeout=60s
-            sudo k3s kubectl get pods -n devops --request-timeout=120s || true
-            sudo k3s kubectl get svc -n devops --request-timeout=120s || true
-
-            echo "✅ Done"
+            echo "✅ Deployment completed"
