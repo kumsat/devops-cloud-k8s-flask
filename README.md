@@ -1,10 +1,10 @@
-📦 DevOps Cloud + Kubernetes Flask Project
+DevOps Cloud + Kubernetes Flask Project
 
 This repository demonstrates an end-to-end DevOps workflow using a real Flask application deployed on Kubernetes (k3s) running on a free-tier EC2 instance, with CI/CD via GitHub Actions and advanced deployment strategies (Blue-Green).
 
-🎯 Goal: Learn and demonstrate modern DevOps practices without paid cloud services.
+Main Goal: Learn and demonstrate modern DevOps practices without paid cloud services.
 
-🧩 Application Overview
+Application Overview:
 
 A lightweight Flask API with health checks and a simple UI.
 
@@ -14,7 +14,7 @@ GET /health	Health check endpoint
 GET /api/hello	API response (color-aware for Blue/Green)
 GET /	Simple UI
 
-## 🏗️ Architecture Overview
+##  Architecture Overview
 
 ```mermaid
 flowchart LR
@@ -30,7 +30,7 @@ flowchart LR
     Ingress --> User[End User]
 ```
 
-🚀 DevOps Pipeline (What Happens on Every Push)
+**DevOps Pipeline** (What Happens on Every Push)
 
 Developer pushes code to GitHub
 
@@ -50,7 +50,7 @@ Kubernetes handles deployment
 
 Service + Ingress expose the app
 
-☸️ Kubernetes Setup
+**Kubernetes Setup**
 
 Cluster: k3s (lightweight Kubernetes)
 
@@ -68,7 +68,7 @@ Service (NodePort + selector switch)
 
 Ingress (Traefik)
 
-🔵🟢 Blue-Green Deployment Strategy
+**Blue-Green Deployment Strategy**
 
 This project implements Blue-Green deployments to achieve zero-downtime releases.
 
@@ -101,7 +101,7 @@ Rollback:
 kubectl -n devops patch svc flask-svc \
   -p '{"spec":{"selector":{"app":"flask-app","version":"blue"}}}'
 
-🔄 CI/CD with GitHub Actions
+**CI/CD with GitHub Actions**
 
 Uses appleboy/ssh-action
 
@@ -121,27 +121,27 @@ Apply Kubernetes manifests
 
 Validate cluster state
 
-🧠 Why This Project Matters
+**Why This Project Matters**
 
 This project demonstrates real-world DevOps skills:
 
-✅ Kubernetes (k3s)
+1) Kubernetes (k3s)
 
-✅ Docker & container lifecycle
+2) Docker & container lifecycle
 
-✅ GitHub Actions CI/CD
+3) GitHub Actions CI/CD
 
-✅ Blue-Green deployments
+4) Blue-Green deployments
 
-✅ Ingress & traffic routing
+5) Ingress & traffic routing
 
-✅ Zero-downtime releases
+6) Zero-downtime releases
 
-✅ Free-tier-friendly design
+7) Free-tier-friendly design
 
-💡 Everything here is hands-on, not theoretical.
+**Everything here is hands-on, not theoretical.**
 
-⚠️ Monitoring (Intentionally Excluded)
+ Monitoring (Intentionally Excluded)
 
 Prometheus + Grafana were intentionally not installed because:
 
@@ -149,9 +149,9 @@ EC2 free tier has limited RAM & disk
 
 Monitoring can cause DiskPressure & instability
 
-👉 In real production, monitoring would be deployed on dedicated nodes.
+In real production, monitoring would be deployed on dedicated nodes.
 
-🛠️ Tech Stack
+**Tech Stack**
 
 Language: Python
 
@@ -167,10 +167,10 @@ Cloud: AWS EC2 (Free Tier)
 
 Ingress: Traefik
 
-📌 How to Run (Quick)
+**How to Run (Quick)**
 curl http://<EC2_PUBLIC_IP>/health
 curl http://<EC2_PUBLIC_IP>/api/hello
 
-👨‍💻 Author
+Author
 
-Built as a hands-on DevOps learning project to understand cloud-native delivery from code to production.
+Satendra Kumar: Built as a hands-on DevOps learning project to understand cloud-native delivery from code to production.
