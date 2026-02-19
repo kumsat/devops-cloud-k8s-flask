@@ -26,41 +26,34 @@ jobs:
           script_stop: true
           script: |
             set -e
-
-            echo "🔑 Connected to EC2"
+            echo "Connected to EC2"
             whoami
             hostname
             uptime
 
-            echo "📁 Go to project directory"
             cd ~/devops-cloud-k8s-flask
 
-            echo "⬇️ Sync repo to origin/main (clean deploy)"
+            echo "Sync repo"
             git fetch origin main
             git reset --hard origin/main
             git clean -fd
 
-            echo "🐳 Build Docker image"
-            docker build -t devops-flask:latest -f docker/Dockerfile .
+            echo "Build Docker image"
+            sudo docker build -t devops-flask:latest -f docker/Dockerfile .
 
-            echo "📦 Import image into k3s (containerd)"
-            docker save devops-flask:latest -o /tmp/devops-flask.tar
+            echo "Import image into k3s containerd"
+            sudo docker save devops-flask:latest -o /tmp/devops-flask.tar
             sudo k3s ctr images import /tmp/devops-flask.tar
 
-            echo "☸️ Configure kubectl (use ubuntu kubeconfig)"
-            export KUBECONFIG=$HOME/.kube/config
+            echo "Cluster check"
+            sudo k3s kubectl get nodes --request-timeout=60s
 
-            echo "✅ Cluster check"
-            kubectl get nodes --request-timeout=60s
+            echo "Apply manifests"
+            sudo k3s kubectl apply -f k8s/ec2/ --request-timeout=120s --validate=false
 
-            echo "🚀 Deploy to Kubernetes"
-            kubectl apply -f k8s/ec2/ --request-timeout=120s --validate=false
+            echo "Check resources"
+            sudo k3s kubectl get ns --request-timeout=60s
+            sudo k3s kubectl get pods -n devops --request-timeout=120s || true
+            sudo k3s kubectl get svc -n devops --request-timeout=120s || true
 
-            echo "📦 Pods status"
-            kubectl get pods -n devops --request-timeout=120s
-
-            echo "🌐 Services status"
-            kubectl get svc -n devops --request-timeout=120s
-
-            echo "✅ Deployment completed successfully"
-
+            echo "✅ Done"
